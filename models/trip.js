@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const tripSchema = new Schema({
+const tripSchema = new mongoose.Schema({
   destination: {
     type: String,
     required: true
@@ -9,6 +9,11 @@ const tripSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'LogEntry'
   }],
+  type: {
+    type: String,
+    enum: ['Business', 'Vacation', 'Adventure', 'Family', 'Other'],
+    required: true
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

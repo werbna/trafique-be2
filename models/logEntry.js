@@ -1,4 +1,7 @@
-const logEntrySchema = new Schema({
+const mongoose = require('mongoose');
+
+
+const logEntrySchema = new mongoose.Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

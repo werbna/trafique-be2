@@ -1,14 +1,9 @@
 const mongoose = require('mongoose');
 
 
-const commentSchema = new mongoose.Schema({
-  content: {
+const photoSchema = new mongoose.Schema({
+  url: {
     type: String,
-    required: true
-  },
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
     required: true
   },
   logEntry: {
@@ -20,4 +15,4 @@ const commentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model('Comment', commentSchema);
+module.exports = mongoose.model('Photo', photoSchema);
