@@ -4,8 +4,22 @@ const Photo = require("../models/photo");
 const LogEntry = require("../models/logEntry");
 const cloudinary = require("cloudinary").v2;
 const router = express.Router();
+// ========== Public Routes ===========
 
-router.post("/logEntry/:logEntryId", verifyToken, async (req, res) => {
+router.get("/:logEntryId", async (req, res) => {
+  try {
+    const photos = await Photo.find({ logEntry: req.params.logEntryId });
+    res.json(photos);
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ message: "Error fetching photos" });
+  }
+});
+
+// ========= Protected Routes =========
+router.use(verifyToken);
+
+router.post("/:logEntryId", verifyToken, async (req, res) => {
   try {
     const logEntry = await LogEntry.findById(req.params.logEntryId);
     if (!logEntry) {
@@ -18,19 +32,12 @@ router.post("/logEntry/:logEntryId", verifyToken, async (req, res) => {
     logEntry.photos.push(photo._id);
     await logEntry.save();
     res.status(201).json(photo);
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Failed to upload photo" });
   }
 });
 
-router.get("/logEntry/:logEntryId", async (req, res) => {
-  try {
-    const photos = await Photo.find({ logEntry: req.params.logEntryId });
-    res.json(photos);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching photos" });
-  }
-});
 
 router.delete("/:photoId", verifyToken, async (req, res) => {
   try {
@@ -41,9 +48,16 @@ router.delete("/:photoId", verifyToken, async (req, res) => {
     if (photo.logEntry.author.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to delete this photo" });
     }
-    await photo.remove();
-    res.json({ message: "Photo deleted successfully" });
-  } catch (error) {
+    const logEntry = await LogEntry.findById(photo.logEntry);
+    if (logEntry) {
+      logEntry.photos.pull(photo._id); 
+      await logEntry.save();
+    }
+    await Photo.findByIdAndDelete(req.params.photoId);
+
+    res.status(200).json({ message: "Photo deleted successfully" });
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Error deleting photo" });
   }
 });

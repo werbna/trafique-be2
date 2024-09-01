@@ -9,7 +9,8 @@ router.get("/", async (req, res) => {
   try {
     const trips = await Trip.find().populate('author', 'username');
     res.json(trips);
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Error fetching trips" });
   }
 });
@@ -21,7 +22,8 @@ router.get("/:tripId", async (req, res) => {
       return res.status(404).json({ message: "Trip not found" });
     }
     res.json(trip);
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Error fetching trip" });
   }
 });
@@ -35,7 +37,8 @@ router.post("/", verifyToken, async (req, res) => {
     req.body.author = req.user._id;
     const trip = await Trip.create(req.body);
     res.status(201).json(trip);
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Failed to create trip" });
   }
 });
@@ -46,12 +49,13 @@ router.put("/:tripId", verifyToken, async (req, res) => {
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
-    if (trip.author.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+    if (trip.author.toString() !== req.user._id.toString() || !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to update this trip" });
     }
     const updatedTrip = await Trip.findByIdAndUpdate(req.params.tripId, req.body, { new: true });
     res.json(updatedTrip);
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Error updating trip" });
   }
 });
@@ -62,12 +66,13 @@ router.delete("/:tripId", verifyToken, async (req, res) => {
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
-    if (trip.author.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+    if (trip.author.toString() !== req.user._id.toString() || !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to delete this trip" });
     }
     await Trip.findByIdAndDelete(req.params.tripId);
     res.json({ message: "Trip deleted successfully" });
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ message: "Error deleting trip" });
   }
 });

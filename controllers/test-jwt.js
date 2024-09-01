@@ -20,7 +20,8 @@ router.post('/verify-token', (req, res) => {
 	try {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		res.json({ decoded });
-	} catch (error) {
+	} catch (err) {
+		console.log(err)
 		res.status(401).json({ error: 'Invalid token.' });
 	}
 });

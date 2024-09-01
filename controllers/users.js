@@ -30,7 +30,8 @@ router.post("/signup", async (req, res) => {
       process.env.JWT_SECRET
     );
     res.status(201).json({ user, token });
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(400).json({ error: error.message });
   }
 });
@@ -47,7 +48,8 @@ router.post("/signin", async (req, res) => {
     } else {
       res.status(401).json({ error: "Invalid username or password." });
     }
-  } catch (error) {
+  } catch (err) {
+    console.log(err)
     res.status(400).json({ error: error.message });
   }
 });
