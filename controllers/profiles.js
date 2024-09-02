@@ -29,8 +29,7 @@ router.get('/:userId', verifyToken, async (req, res) => {
         }
       })
       .populate('logEntries', 'title content')
-      .populate('comments', 'content')
-      .exec();
+      .populate('comments', 'content');
       
     if (!user) {
       return res.status(404).json({ error: 'Profile not found.' });

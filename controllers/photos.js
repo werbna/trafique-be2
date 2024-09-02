@@ -19,7 +19,7 @@ router.get("/:logEntryId", async (req, res) => {
 // ========= Protected Routes =========
 router.use(verifyToken);
 
-router.post("/:logEntryId", verifyToken, async (req, res) => {
+router.post("/:logEntryId", async (req, res) => {
   try {
     const logEntry = await LogEntry.findById(req.params.logEntryId).populate('author', 'username email');
     if (!logEntry) {
@@ -29,11 +29,11 @@ router.post("/:logEntryId", verifyToken, async (req, res) => {
     req.body.url = result.secure_url;
     req.body.logEntry = req.params.logEntryId;
     req.body.author = req.user._id;
-    const photo = await Photo.create(req.body);
+    let photo = await Photo.create(req.body);
     logEntry.photos.push(photo._id);
     await logEntry.save();
-    const populatedPhoto = await photo.populate('author', 'username email').execPopulate();
-    res.status(201).json(populatedPhoto);
+    photo = await photo.populate('author', 'username email');
+    res.status(201).json(photo);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Failed to upload photo" });
@@ -41,7 +41,7 @@ router.post("/:logEntryId", verifyToken, async (req, res) => {
 });
 
 
-router.delete("/:photoId", verifyToken, async (req, res) => {
+router.delete("/:photoId", async (req, res) => {
   try {
     const photo = await Photo.findById(req.params.photoId).populate('logEntry', 'author').populate('author', 'username email');
     if (!photo) {

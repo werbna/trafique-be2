@@ -35,27 +35,27 @@ router.get("/:logEntryId", async (req, res) => {
 // ========= Protected Routes =========
 router.use(verifyToken);
 
-router.post("/", verifyToken, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const trip = await Trip.findById(req.body.trip);
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
     req.body.author = req.user._id;
-    const logEntry = await LogEntry.create(req.body);
+    let logEntry = await LogEntry.create(req.body);
     trip.logEntries.push(logEntry._id);
     await trip.save();
-    const populatedLogEntry = await logEntry.populate('author', 'username email').execPopulate();
-    res.status(201).json(populatedLogEntry);
+    logEntry = await logEntry.populate('author', 'username email');
+    res.status(201).json(logEntry);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Failed to create log entry" });
   }
 });
 
-router.put("/:logEntryId", verifyToken, async (req, res) => {
+router.put("/:logEntryId", async (req, res) => {
   try {
-    const logEntry = await LogEntry.findById(req.params.logEntryId).populate('author', 'username email');
+    let logEntry = await LogEntry.findById(req.params.logEntryId).populate('author', 'username email');
     if (!logEntry) {
       return res.status(404).json({ message: "Log entry not found" });
     }
@@ -71,7 +71,7 @@ router.put("/:logEntryId", verifyToken, async (req, res) => {
   }
 });
 
-router.delete("/:logEntryId", verifyToken, async (req, res) => {
+router.delete("/:logEntryId", async (req, res) => {
   try {
     const logEntry = await LogEntry.findById(req.params.logEntryId).populate('author', 'username email');
     if (!logEntry) {

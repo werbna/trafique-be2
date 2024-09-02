@@ -20,7 +20,7 @@ router.get("/:logEntryId", async (req, res) => {
 
 router.use(verifyToken);
 
-router.post("/:logEntryId", verifyToken, async (req, res) => {
+router.post("/:logEntryId", async (req, res) => {
   try {
     const logEntry = await LogEntry.findById(req.params.logEntryId);
     if (!logEntry) {
@@ -28,20 +28,20 @@ router.post("/:logEntryId", verifyToken, async (req, res) => {
     }
     req.body.logEntry = req.params.logEntryId;
     req.body.author = req.user._id;
-    const comment = await Comment.create(req.body);
+    let comment = await Comment.create(req.body);
     logEntry.comments.push(comment._id);
     await logEntry.save();
-    const populatedComment = await comment.populate('author', 'username email').execPopulate();
-    res.status(201).json(populatedComment);
+    comment = await comment.populate('author', 'username email');
+    res.status(201).json(comment);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Failed to create comment" });
   }
 });
 
-router.put("/:commentId", verifyToken, async (req, res) => {
+router.put("/:commentId", async (req, res) => {
   try {
-    const comment = await Comment.findById(req.params.commentId).populate('author', 'username email');
+    let comment = await Comment.findById(req.params.commentId).populate('author', 'username email');
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
@@ -57,7 +57,7 @@ router.put("/:commentId", verifyToken, async (req, res) => {
   }
 });
 
-router.delete("/:commentId", verifyToken, async (req, res) => {
+router.delete("/:commentId", async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.commentId).populate('author', 'username email');
     if (!comment) {

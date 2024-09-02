@@ -31,21 +31,21 @@ router.get("/:tripId", async (req, res) => {
 // ========= Protected Routes =========
 router.use(verifyToken);
 
-router.post("/", verifyToken, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     req.body.author = req.user._id;
-    const trip = await Trip.create(req.body);
-    const populatedTrip = await trip.populate('author', 'username email').execPopulate();
-    res.status(201).json(populatedTrip);
+    let trip = await Trip.create(req.body);
+    trip = await trip.populate('author', 'username email');
+    res.status(201).json(trip);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Failed to create trip" });
   }
 });
 
-router.put("/:tripId", verifyToken, async (req, res) => {
+router.put("/:tripId", async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.tripId).populate('author', 'username email');
+    let trip = await Trip.findById(req.params.tripId).populate('author', 'username email');
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
@@ -61,7 +61,7 @@ router.put("/:tripId", verifyToken, async (req, res) => {
   }
 });
 
-router.delete("/:tripId", verifyToken, async (req, res) => {
+router.delete("/:tripId", async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.tripId).populate('author', 'username email');
     if (!trip) {
