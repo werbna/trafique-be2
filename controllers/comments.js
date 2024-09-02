@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/:logEntryId", async (req, res) => {
   try {
-    const comments = await Comment.find({ logEntry: req.params.logEntryId }).populate('author', 'username');
+    const comments = await Comment.find({ logEntry: req.params.logEntryId }).populate('author', 'username email');
     res.json(comments);
   } catch (err) {
     console.log(err)
@@ -31,7 +31,8 @@ router.post("/:logEntryId", verifyToken, async (req, res) => {
     const comment = await Comment.create(req.body);
     logEntry.comments.push(comment._id);
     await logEntry.save();
-    res.status(201).json(comment);
+    const populatedComment = await comment.populate('author', 'username email').execPopulate();
+    res.status(201).json(populatedComment);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Failed to create comment" });
@@ -40,11 +41,11 @@ router.post("/:logEntryId", verifyToken, async (req, res) => {
 
 router.put("/:commentId", verifyToken, async (req, res) => {
   try {
-    const comment = await Comment.findById(req.params.commentId);
+    const comment = await Comment.findById(req.params.commentId).populate('author', 'username email');
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    if (comment.author.toString() !== req.user._id.toString() || !req.user.isAdmin) {
+    if (comment.author._id.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to edit this comment" });
     }
     comment.content = req.body.content || comment.content;
@@ -58,11 +59,11 @@ router.put("/:commentId", verifyToken, async (req, res) => {
 
 router.delete("/:commentId", verifyToken, async (req, res) => {
   try {
-    const comment = await Comment.findById(req.params.commentId);
+    const comment = await Comment.findById(req.params.commentId).populate('author', 'username email');
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    if (comment.author.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+    if (comment.author._id.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to delete this comment" });
     }
     const logEntry = await LogEntry.findById(comment.logEntry);

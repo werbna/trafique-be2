@@ -27,6 +27,18 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  trips: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Trip'
+  }],
+  logEntries: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LogEntry'
+  }],
+  comments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Comment'
+  }],
   profilePicture: String,
   bio: String
 },{ timestamps:true } );

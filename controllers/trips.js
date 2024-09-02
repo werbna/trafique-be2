@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const trips = await Trip.find().populate('author', 'username');
+    const trips = await Trip.find().populate('author', 'username email');
     res.json(trips);
   } catch (err) {
     console.log(err)
@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:tripId", async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.tripId).populate('author', 'username');
+    const trip = await Trip.findById(req.params.tripId).populate('author', 'username email');
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
@@ -28,7 +28,6 @@ router.get("/:tripId", async (req, res) => {
   }
 });
 
-
 // ========= Protected Routes =========
 router.use(verifyToken);
 
@@ -36,7 +35,8 @@ router.post("/", verifyToken, async (req, res) => {
   try {
     req.body.author = req.user._id;
     const trip = await Trip.create(req.body);
-    res.status(201).json(trip);
+    const populatedTrip = await trip.populate('author', 'username email').execPopulate();
+    res.status(201).json(populatedTrip);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Failed to create trip" });
@@ -45,15 +45,16 @@ router.post("/", verifyToken, async (req, res) => {
 
 router.put("/:tripId", verifyToken, async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.tripId);
+    const trip = await Trip.findById(req.params.tripId).populate('author', 'username email');
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
-    if (trip.author.toString() !== req.user._id.toString() || !req.user.isAdmin) {
+    if (trip.author._id.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to update this trip" });
     }
-    const updatedTrip = await Trip.findByIdAndUpdate(req.params.tripId, req.body, { new: true });
-    res.json(updatedTrip);
+    Object.assign(trip, req.body);
+    await trip.save();
+    res.json(trip);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Error updating trip" });
@@ -62,11 +63,11 @@ router.put("/:tripId", verifyToken, async (req, res) => {
 
 router.delete("/:tripId", verifyToken, async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.tripId);
+    const trip = await Trip.findById(req.params.tripId).populate('author', 'username email');
     if (!trip) {
       return res.status(404).json({ message: "Trip not found" });
     }
-    if (trip.author.toString() !== req.user._id.toString() || !req.user.isAdmin) {
+    if (trip.author._id.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to delete this trip" });
     }
     await Trip.findByIdAndDelete(req.params.tripId);

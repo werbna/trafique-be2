@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/:logEntryId", async (req, res) => {
   try {
-    const photos = await Photo.find({ logEntry: req.params.logEntryId });
+    const photos = await Photo.find({ logEntry: req.params.logEntryId }).populate('logEntry', 'author').populate('author', 'username email');
     res.json(photos);
   } catch (err) {
     console.log(err)
@@ -21,17 +21,19 @@ router.use(verifyToken);
 
 router.post("/:logEntryId", verifyToken, async (req, res) => {
   try {
-    const logEntry = await LogEntry.findById(req.params.logEntryId);
+    const logEntry = await LogEntry.findById(req.params.logEntryId).populate('author', 'username email');
     if (!logEntry) {
       return res.status(404).json({ message: "Log entry not found" });
     }
     const result = await cloudinary.uploader.upload(req.file.path);
     req.body.url = result.secure_url;
     req.body.logEntry = req.params.logEntryId;
+    req.body.author = req.user._id;
     const photo = await Photo.create(req.body);
     logEntry.photos.push(photo._id);
     await logEntry.save();
-    res.status(201).json(photo);
+    const populatedPhoto = await photo.populate('author', 'username email').execPopulate();
+    res.status(201).json(populatedPhoto);
   } catch (err) {
     console.log(err)
     res.status(500).json({ message: "Failed to upload photo" });
@@ -41,7 +43,7 @@ router.post("/:logEntryId", verifyToken, async (req, res) => {
 
 router.delete("/:photoId", verifyToken, async (req, res) => {
   try {
-    const photo = await Photo.findById(req.params.photoId);
+    const photo = await Photo.findById(req.params.photoId).populate('logEntry', 'author').populate('author', 'username email');
     if (!photo) {
       return res.status(404).json({ message: "Photo not found" });
     }
