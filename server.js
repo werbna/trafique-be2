@@ -26,10 +26,7 @@ cloudinary.config({
   cloudinary_url: process.env.CLOUDINARY_URL,
 });
 
-app.use(cors({
-  origin: ['https://trafique.netlify.app'],
-  credentials: true,
-}));
+app.use(cors());
 
 // Routes go here
 app.use('/test-jwt', testJWTRouter);
