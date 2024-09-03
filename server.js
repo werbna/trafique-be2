@@ -16,6 +16,7 @@ const photosRouter = require('./controllers/photos');
 
 const app = express();
 
+
 mongoose.connect(process.env.MONGODB_URI, );
 
 mongoose.connection.on('connected', () => {
@@ -25,7 +26,7 @@ mongoose.connection.on('connected', () => {
 cloudinary.config({
   cloudinary_url: process.env.CLOUDINARY_URL,
 });
-
+app.use(express.json())
 app.use(cors());
 
 // Routes go here
