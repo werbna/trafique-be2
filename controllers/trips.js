@@ -52,7 +52,8 @@ router.put("/:tripId", async (req, res) => {
     if (trip.author._id.toString() !== req.user._id.toString() && !req.user.isAdmin) {
       return res.status(403).json({ message: "You are not authorized to update this trip" });
     }
-    Object.assign(trip, req.body);
+    trip.destination = req.body.destination;
+    trip.type = req.body.type;
     await trip.save();
     res.json(trip);
   } catch (err) {

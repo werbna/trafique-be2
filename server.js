@@ -34,7 +34,7 @@ app.use('/test-jwt', testJWTRouter);
 app.use('/users', usersRouter);
 app.use('/profiles', profilesRouter);
 app.use('/trips', tripsRouter);
-app.use('/log-entries', logEntriesRouter);
+app.use('/logEntries', logEntriesRouter);
 app.use('/comments', commentsRouter); 
 app.use('/photos', photosRouter);
 

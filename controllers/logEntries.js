@@ -6,6 +6,8 @@ const router = express.Router();
 
 // ========== Public Routes ===========
 
+
+
 router.get("/trips/:tripId", async (req, res) => {
   try {
     const logEntries = await LogEntry.find({ trip: req.params.tripId }).populate('author', 'username email');
@@ -14,7 +16,7 @@ router.get("/trips/:tripId", async (req, res) => {
     }
     res.json(logEntries);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res.status(500).json({ message: "Error fetching log entries" });
   }
 });

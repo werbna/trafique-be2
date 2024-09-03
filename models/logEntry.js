@@ -32,7 +32,8 @@ const logEntrySchema = new mongoose.Schema({
   photos: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Photo'
-  }]
+  }],
+  trip: { type: mongoose.Schema.Types.ObjectId, ref: 'Trip' },
 }, {
   timestamps: true
 });
