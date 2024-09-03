@@ -13,3 +13,4 @@ Travel Log is a web application backend built with Node.js, Express, and MongoDB
 - RESTful API endpoints for managing trips, log entries, comments, and photos
 - Middleware for authentication and error handling
 - MongoDB database for storing data
+- Implemented admin property for role differentiation
