@@ -32,7 +32,7 @@ router.post("/signup", async (req, res) => {
     res.status(201).json({ user, token });
   } catch (err) {
     console.log(err)
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: err.message });
   }
 });
 
