@@ -50,7 +50,7 @@ router.post("/signin", async (req, res) => {
     }
   } catch (err) {
     console.log(err)
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: err.message });
   }
 });
 
